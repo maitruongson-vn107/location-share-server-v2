@@ -13,10 +13,15 @@
     - main.py: luồng thực thi chính của server
     - LocateShareAPI.py: API "Chia sẻ vị trí" và "Tìm quanh đây"
     - UserManagerAPI.py: API "Đăng nhập" và "Đăng kí"
-    - test.py: file test kết nối với database (chạy file test.py, nếu output ra kết quả thì connect DB thành công)
     - db_share_location.sql: file .sql database:
         mỗi khi pull về, import vào local MySQL
         sau khi code, không export phiên bản hiện tại trong MySQL (tránh conflict với phiên bản database trên máy local của thành viên khác)
+    - test.py: file test các API hệ thống
+        
+* Ngôn ngữ và công nghệ sử dụng:
+    - python 3.x
+    - Flask (flask, flask-restful)
+    - mysql-connector-python
         
 * Hướng dẫn khi code trên các nhánh:
     - Chuyển sang nhánh dev: git checkout dev
