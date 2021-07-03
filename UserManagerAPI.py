@@ -24,7 +24,6 @@ def login_api(username, hashed_password):
         "avatarUrl": user[4],
         "gender": user[5],
         "age": yearNow - user[6],
-        "currentCity": user[7]
     }
     if user[0] not in online_users:
         online_users.add(user[0])
@@ -39,19 +38,18 @@ def logout_api(userId):
         return {"msg": "fail", "data": None}
 
 
-def signup_api(username, password, fullName, avatarUrl, gender, birthYear, currentCity):
+def signup_api(username, password, fullName, avatarUrl, gender, birthYear):
     if username is None or password is None or \
-            fullName is None or gender is None or \
-            currentCity is None:
+            fullName is None or gender is None: 
         return {"msg": "fail"}
     sql = "SELECT * FROM User WHERE username = %s"
     params = (username,)
     cursor.execute(sql, params)
     existing_user = cursor.fetchone()
     if existing_user is None:
-        sql = "INSERT INTO User(username, password, fullName, avatarUrl, gender, birthYear, currentCity, counter) " \
+        sql = "INSERT INTO User(username, password, fullName, avatarUrl, gender, birthYear, counter) " \
               "VALUES (%s, %s, %s, %s, %s, %s, %s, 0)"
-        params = (username, password, fullName, avatarUrl, gender, birthYear, currentCity)
+        params = (username, password, fullName, avatarUrl, gender, birthYear)
         try:
             cursor.execute(sql, params)
             db.commit()
@@ -66,7 +64,6 @@ def signup_api(username, password, fullName, avatarUrl, gender, birthYear, curre
                 "avatarUrl": avatarUrl,
                 "gender": gender,
                 "age": yearNow - birthYear,
-                "currentCity": currentCity
             }
             sql1 = "SELECT * FROM User WHERE UserId != %s"
             params1 = (userId, )

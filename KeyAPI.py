@@ -1,5 +1,5 @@
 import random
-from Crypto.Cipher import DES3
+
 from config import db
 
 cursor = db.cursor()
@@ -36,18 +36,4 @@ def add_key(userId1, userId2):
         }
 
 
-# Input: (int,int)
-# Output: tuple (int,int)
-def generate_session_key(common_key: int, counter: int):
-    des3_1 = b'12345678'
-    des3_2 = b'abcdefgh'
-    common_key = common_key.to_bytes(8, 'big')
-    key = bytearray()
-    key.extend(des3_1)
-    key.extend(des3_2)
-    key.extend(common_key)
 
-    counter = counter.to_bytes(8, 'big')
-    des3 = DES3.new(key, DES3.MODE_ECB)
-    des3_out = des3.encrypt(counter)
-    return int.from_bytes(des3_out[0:4], 'big'), int.from_bytes(des3_out[4:8], 'big')

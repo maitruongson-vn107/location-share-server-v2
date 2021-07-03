@@ -1,15 +1,15 @@
 import datetime
 import random
 
-from KeyAPI import generate_session_key
+
 from config import db
 import UserManagerAPI
-
+import requests
 cursor = db.cursor()
 
 
 def change_ava(avaUrl, userId):
-    print('a')
+
     sql = "UPDATE User SET avatarUrl = %s WHERE userId = %s"
     params = (avaUrl, userId)
     try:
@@ -19,9 +19,11 @@ def change_ava(avaUrl, userId):
     except:
         return {"msg": "fail", "data": None}
 
-
-def search_api(userId, currentCity):
-    update_locate_api(userId, currentCity)
+def get_client_url(client_id:int):
+    port = 5000 + client_id
+    return 'http://127.0.0.1:'+ str(port) +'/'
+def search_api(userId):
+    #get all user
     try:
         sql = "SELECT u.*, k.commonKey FROM User u, CommonKey k " \
               "WHERE (u.userId = k.userId1 AND k.userId2 = %s) OR (u.userId = k.userId2 AND k.userId1 = %s) " \
@@ -29,30 +31,41 @@ def search_api(userId, currentCity):
         params = (userId, userId)
         cursor.execute(sql, params)
         results = cursor.fetchall()
+        
     except:
         return {"msg": "fail", "data": None}
     data = []
     # Getting results
+    
     for u in results:
+        #for each online user
         if u[0] in UserManagerAPI.online_users:
-            # Update counter
+
+            # Update_get counter and get common_key with current user and other online user
             counter = u[-2]
             counter = counter + 1
             update_counter_api(u[0], counter)
-    
-            # Generate session key
             common_key = int(u[-1])
-            k_0, k_1 = generate_session_key(counter, common_key)
-    
-            # Calculate x_b, x_a, x
-            r = random.randint(10000, 4000000000)
-            b_current_city = int(u[-3])
-            x_b = r * (b_current_city + k_0) + k_1
-            x_a = int(currentCity) + k_0
+
+            # Alice and Bob send encrypted position
+            body_data = {"common_key":common_key,"counter":counter,"role":'bob'}
+            bob_res = requests.post(get_client_url(u[0]) + 'encrypt_pos',json = body_data).json()
+
+            body_data = {"common_key":common_key,"counter":counter,"role":'alice'}
+            alice_res = requests.post(get_client_url(userId) + 'encrypt_pos',json = body_data).json()
+
+            #now sam doesn't know about position
+            x_a = alice_res['x_a']
+            r = bob_res['r']
+
+            x_b = bob_res['x_b']
             x = r * x_a - x_b
-    
+
+            body_data = {'x':x}
+            #send x to alice to check whether bob and alice in the same position
+            check = requests.post(get_client_url(userId) + 'check',json = body_data).json()['check']
             # Get result list
-            if x + k_1 == 0:
+            if check:
                 today = datetime.date.today()
                 yearNow = today.year
                 data.append({
@@ -64,16 +77,6 @@ def search_api(userId, currentCity):
 
     return {"msg": "success", "data": data}
 
-
-def update_locate_api(userId, currentCity):
-    sql = "UPDATE User SET currentCity = %s WHERE userId = %s"
-    params = (currentCity, userId)
-    try:
-        cursor.execute(sql, params)
-        db.commit()
-        return {"msg": "success", "data": None}
-    except:
-        return {"msg": "fail", "data": None}
 
 
 def update_counter_api(userId, counter):

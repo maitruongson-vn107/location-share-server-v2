@@ -16,16 +16,9 @@ import os
 def search():
     j = request.get_json(force=True)
     userId = j['userId']
-    currentCity = j['currentCity']
-    return LocateShareAPI.search_api(userId, currentCity)
+    return LocateShareAPI.search_api(userId)
 
 
-@app.route('/update_locate', methods=['POST'])
-def update_locate():
-    j = request.get_json(force=True)
-    userId = j['userId']
-    currentCity = j['currentCity']
-    return LocateShareAPI.update_locate_api(userId, currentCity)
 
 
 @app.route('/login', methods=['POST'])
@@ -50,15 +43,13 @@ def signUp():
     avatarUrl = j['avatarUrl']
     gender = j['gender']
     birthYear = j['birthYear']
-    currentCity = j['currentCity']
-    return UserManagerAPI.signup_api(username, password, fullName, avatarUrl, gender, birthYear, currentCity)
+    return UserManagerAPI.signup_api(username, password, fullName, avatarUrl, gender, birthYear)
 
 
 @app.route('/upload/<userId>', methods=['GET', 'POST'])
 def upload_file(userId):
     # handle request and store img here
     assert userId == request.view_args['userId']
-    print(userId)
     userId = str(userId)
     uploaded_file = request.files['file']
     if uploaded_file.filename != '':
@@ -67,10 +58,8 @@ def upload_file(userId):
     res['data'] = userId + '_' + uploaded_file.filename
     return res
 
-
 if __name__ == "__main__":
     app.run(debug=True)
     arr = os.listdir('./static')
-    print(arr)
     for i in arr:
         url_for("static", filename="static/" + i)
