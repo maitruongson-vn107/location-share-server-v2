@@ -43,12 +43,14 @@ def signup_api(username, password, fullName, avatarUrl, gender, birthYear):
             fullName is None or gender is None: 
         return {"msg": "fail"}
     sql = "SELECT * FROM User WHERE username = %s"
+    
     params = (username,)
     cursor.execute(sql, params)
     existing_user = cursor.fetchone()
+    print(existing_user)
     if existing_user is None:
         sql = "INSERT INTO User(username, password, fullName, avatarUrl, gender, birthYear, counter) " \
-              "VALUES (%s, %s, %s, %s, %s, %s, %s, 0)"
+              "VALUES (%s, %s, %s, %s, %s, %s,  0)"
         params = (username, password, fullName, avatarUrl, gender, birthYear)
         try:
             cursor.execute(sql, params)
@@ -65,6 +67,7 @@ def signup_api(username, password, fullName, avatarUrl, gender, birthYear):
                 "gender": gender,
                 "age": yearNow - birthYear,
             }
+            print(data)
             sql1 = "SELECT * FROM User WHERE UserId != %s"
             params1 = (userId, )
             cursor.execute(sql1, params1)
